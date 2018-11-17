@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+	<style>
+		#results {
+			max-width:90%;
+			margin:auto;
+		}
+		.sent, .received {
+			margin:10px;
+			clear:both;
+			padding:15px;
+			max-width:75%;
+			text-align:justify;
+		}
+		.received {
+			background-color:lightgrey;
+			float:left;
+			-moz-border-radius: 0 20px 20px;
+			-webkit-border-radius: 0 20px 20px;
+			-khtml-border-radius: 0 20px 20px;
+			border-radius: 0 20px 20px;
+		}
+		.sent {
+			background-color:lightblue;
+			float:right;
+			-moz-border-radius: 20px 0 20px 20px;
+			-webkit-border-radius: 20px 0 20px 20px;
+			-khtml-border-radius: 20px 0 20px 20px;
+			border-radius: 20px 0 20px 20px;
+		}
+		.details {font-weight:bold;}
+		.sent .details {float:right;}
+		.error {
+			color:red;
+			text-align:center;
+			font-size:x-large;
+			margin:50px 0;
+		}
+		img {
+			max-width:400px;
+			margin-top:5px;
+		}
+		img:not(.loading) {border:1px solid darkslategray;}
+		img.loading {
+			width:64px;
+			margin:100px auto;
+			display:block;
+		}
+		img:hover {
+			-ms-transform: scale(1.5); /* IE 9 */
+			-webkit-transform: scale(1.5); /* Safari 3-8 */
+			transform: scale(1.5); 
+		}
+		h5 {clear:both;}
+
+		@media print {
+			div{page-break-inside: avoid;}
+		}
+	</style>
+	<body>
+		<div id="results"></div>
+		<script>
+			/********** Enter Your Values Here **********/
+			
+			var messageReceiverName		= "";	/* Your Name */
+			var messageReceiverNumber	= "";	/* Your Phone Number */
+			var textMessageXMLFile		= ""; /* XML File Path & Name */
+			var loadingGIFImageFile		= ""; /* Page Loading Progress GIF Animation Path & Name */
+
+			/******* Don't Modify Below This Line *******/
+
+			var results = document.getElementById('results');
+			if (!textMessageXMLFile) {javascript_abort("You need to enter an XML filename for the textMessageXMLFile variable.");}
+			loadingGIFImageFile ? results.innerHTML = "<img class='loading' src='" + loadingGIFImageFile + "'>" : ''; 
+			
+			try {
+				var xhttp = new XMLHttpRequest();
+				xhttp.open("GET", textMessageXMLFile, true);
+				xhttp.responseType = "document";
+				xhttp.onreadystatechange = function() {
+					if (this.readyState == 4 && this.status == 200) {parseTextMessagesXML(this);}
+				};
+				xhttp.onerror = function() {console.log("Error loading XML.");};
+				xhttp.onloadend = function() {
+					if(xhttp.status == 404) {javascript_abort("The XML file '" + textMessageXMLFile + "' does not exist.");}
+				}
+				xhttp.send();
+			} catch (err) {
+				results.innerHTML = err.message;
+			}
+				
+				
+			function parseTextMessagesXML(xml) {
+				var i, x, y, z, messages = [], temp, type, html, xml;
+				xml = xml.responseXML;
+				if (!xml) {javascript_abort("The XML file cannot be parsed. Please <a href='" + textMessageXMLFile + "' target='_blank'>review the data</a> before proceeding.");}
+				x = xml.getElementsByTagName('sms');
+				html = "<h2>Text Message History with " + x[0].getAttribute('contact_name') + "</h2>";
+
+				for (i = 0; i < x.length; i++) { 
+					type = (x[i].getAttribute('type') == 1 ? "received" : (x[i].getAttribute('type') == 2 ? "sent" : ""));
+					temp = "<div class='" + type + "'>";
+					temp += "<span class='details'>" + x[i].getAttribute('readable_date') +
+						(type == 'received' ? " - " + x[i].getAttribute('contact_name') + 
+							formatPhoneNumber(x[i].getAttribute('address')) : 
+							(type == 'sent' ? (messageReceiverName ? " - " + messageReceiverName : "") + 
+								formatPhoneNumber(messageReceiverNumber) : ""))
+						+ "</span><br>";
+					temp += x[i].getAttribute('body') + "";
+					temp += "</div>";
+					messages.push({date:x[i].getAttribute('readable_date'),text:temp});
+				}
+				
+				x = xml.getElementsByTagName('mms');
+				for (i = 0; i < x.length; i++) { 
+					type = (x[i].getAttribute('msg_box') == 1 ? "received" : (x[i].getAttribute('msg_box') == 2 ? "sent" : ""));
+					temp = "<div class='" + type + "'>";
+					temp += "<span class='details'>" + x[i].getAttribute('readable_date') +
+						(type == 'received' ? " - " + x[i].getAttribute('contact_name') +
+						formatPhoneNumber(x[i].getAttribute('address')) : 
+							(type == 'sent' ? (messageReceiverName ? " - " + messageReceiverName : "") + 
+								formatPhoneNumber(messageReceiverNumber) : ""))
+						+ "</span><br>";
+					y = x[i].getElementsByTagName('part');
+					for (z = 0; z < y.length; z++) {
+						if (y[z].getAttribute('ct') == 'image/png') {
+							temp += "<img src='data:image/png;base64, " + y[z].getAttribute('data') + "'><br>";
+						} else if (y[z].getAttribute('ct') == 'image/jpeg') {
+							temp += "<img src='data:image/jpeg;base64, " + y[z].getAttribute('data') + "'><br>";
+						} else if (y[z].getAttribute('ct') == 'text/plain') {
+							temp += y[z].getAttribute('text') + "<br>";
+						}			
+					}
+					temp += "</div>";
+					messages.push({date:x[i].getAttribute('readable_date'),text:temp});
+				}
+
+				messages.sort(function(a,b) {
+					a = new Date(a.date);
+					b = new Date(b.date);
+					return a > b ? 1 : a < b ? -1 : 0;
+				});
+				
+				results.innerHTML = html;
+
+				for (i = 0; i < messages.length; i++) {
+					temp = document.createElement('div');
+					temp.innerHTML = messages[i]['text'];
+					results.appendChild(temp.firstChild);
+				}
+
+				x = xml.getElementsByTagName('smses');
+				temp = document.createElement('div');
+				temp.innerHTML = "<h5>Total Text Message Count: " + x[0].getAttribute('count') +
+					"<br>" + "SMS Messages: " + xml.getElementsByTagName('sms').length +
+					" - " + "MMS Messages: " + xml.getElementsByTagName('mms').length + "</h5>";
+				results.appendChild(temp.firstChild);
+			}
+
+			function formatPhoneNumber(number) {
+				number = number.replace(/\D|\+/g, '').match(/(\d{3})(\d{3})(\d{4})$/)
+				if (number) {return ' - (' + number[1] + ') ' + number[2] + '-' + number[3];}
+				return '';
+			}
+			
+			function javascript_abort(msg) {
+				document.getElementById('results').innerHTML = "<div class='error'>ERROR: " + msg + "</div>";
+			}
+		</script>
+	</body>
+</html>
