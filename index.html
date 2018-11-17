@@ -1,6 +1,10 @@
 <!DOCTYPE html>
 <html>
 	<style>
+		body {
+			background-color:black;
+			color:white;
+		}
 		#results {
 			max-width:90%;
 			margin:auto;
@@ -11,6 +15,7 @@
 			padding:15px;
 			max-width:75%;
 			text-align:justify;
+			color:black;
 		}
 		.received {
 			background-color:lightgrey;
@@ -55,6 +60,10 @@
 
 		@media print {
 			div{page-break-inside: avoid;}
+			body {
+				background-color:white;
+				color:black;
+			}
 		}
 	</style>
 	<body>
