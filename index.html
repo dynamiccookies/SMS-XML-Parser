@@ -51,15 +51,15 @@
 			margin:100px auto;
 			display:block;
 		}
-		img:hover {
-			-ms-transform: scale(1.5); /* IE 9 */
-			-webkit-transform: scale(1.5); /* Safari 3-8 */
+		img:not(.loading):hover {
+			-ms-transform: scale(1.5);
+			-webkit-transform: scale(1.5);
 			transform: scale(1.5); 
 		}
 		h5 {clear:both;}
 
 		@media print {
-			div{page-break-inside: avoid;}
+			div {page-break-inside:avoid;}
 			body {
 				background-color:white;
 				color:black;
@@ -73,8 +73,8 @@
 			
 			var messageReceiverName		= "";	/* Your Name */
 			var messageReceiverNumber	= "";	/* Your Phone Number */
-			var textMessageXMLFile		= ""; /* XML File Path & Name */
-			var loadingGIFImageFile		= ""; /* Page Loading Progress GIF Animation Path & Name */
+			var textMessageXMLFile		= "";	/* XML File Path & Name */
+			var loadingGIFImageFile		= "";	/* Page Loading Progress GIF Animation Path & Name */
 
 			/******* Don't Modify Below This Line *******/
 
@@ -102,7 +102,9 @@
 			function parseTextMessagesXML(xml) {
 				var i, x, y, z, messages = [], temp, type, html, xml;
 				xml = xml.responseXML;
-				if (!xml) {javascript_abort("The XML file cannot be parsed. Please <a href='" + textMessageXMLFile + "' target='_blank'>review the data</a> before proceeding.");}
+				if (!xml) {
+					javascript_abort("The XML file cannot be parsed. Please <a href='" + textMessageXMLFile + "' target='_blank'>review the data</a> before proceeding.");
+				}
 				x = xml.getElementsByTagName('sms');
 				html = "<h2>Text Message History with " + x[0].getAttribute('contact_name') + "</h2>";
 
@@ -167,9 +169,9 @@
 			}
 
 			function formatPhoneNumber(number) {
-				number = number.replace(/\D|\+/g, '').match(/(\d{3})(\d{3})(\d{4})$/)
-				if (number) {return ' - (' + number[1] + ') ' + number[2] + '-' + number[3];}
-				return '';
+				trimmed = number.replace(/\D|\+/g, '').match(/(\d{3})(\d{3})(\d{4})$/)
+				if (trimmed) {return ' - (' + trimmed[1] + ') ' + trimmed[2] + '-' + trimmed[3];}
+				else {return ' - (' + number + ')';}
 			}
 			
 			function javascript_abort(msg) {
