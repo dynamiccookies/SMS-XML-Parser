@@ -41,6 +41,7 @@
 			font-size:x-large;
 			margin:50px 0;
 		}
+		.error a {color:white;}
 		img {
 			max-width:400px;
 			margin-top:5px;
@@ -85,7 +86,7 @@
 			try {
 				var xhttp = new XMLHttpRequest();
 				xhttp.open("GET", textMessageXMLFile, true);
-				xhttp.responseType = "document";
+				xhttp.responseType = "text";	/* text = text; document = XML;	*/
 				xhttp.onreadystatechange = function() {
 					if (this.readyState == 4 && this.status == 200) {parseTextMessagesXML(this);}
 				};
@@ -100,8 +101,40 @@
 				
 				
 			function parseTextMessagesXML(xml) {
-				var i, x, y, z, messages = [], temp, type, html, xml;
-				xml = xml.responseXML;
+				var i, x, y, z, messages = [], temp, type, html;
+				xml = xml.responseText;
+
+				/*	Convert all emoji symbols from Decimal HTML Entity (UTF-16 Dec) format to Hexadecimal HTML Entity (UTF-16 Hex (C Syntax))
+					Example: &#55357;&#56834; -> &#x1f602; (Face with Tears of Joy)
+					Huge help in building structure of function: https://stackoverflow.com/a/48143046/4013327	*/
+				xml = xml.replace(/(&#\d+;){2}/g, function(match) {
+					match = match.replace(/&#/g,'').split(';');
+					var binFirst = (parseInt('0x' + parseInt(match[0]).toString(16)) - 0xd800).toString(2);
+					var binSecond = (parseInt('0x' + parseInt(match[1]).toString(16)) - 0xdc00).toString(2);
+					binFirst = '0000000000'.substr(binFirst.length) + binFirst;
+					binSecond = '0000000000'.substr(binSecond.length) + binSecond;
+					return '&#x' + (('0x' + (parseInt(binFirst + binSecond, 2).toString(16))) - (-0x10000)).toString(16) + ';';
+				});
+				
+				xml = xml.replace("<?xml version='1.0' encoding='UTF-8' standalone='yes' ?>",'');
+
+				/*	Convert XML string back to XML for parsing	*/
+				try { // code for IE
+					var xmlDoc = new ActiveXObject("Microsoft.XMLDOM");
+					xmlDoc.async = "false";
+					xmlDoc.loadXML(xml);
+				}catch(error) { // code for Mozilla, Firefox, Opera, etc.
+					try {
+						var parser = new DOMParser();
+						var xmlDoc = parser.parseFromString(xml,"text/xml");
+					}catch(error) {
+						alert(error.message);
+						return;
+					}
+				}
+				xml = xmlDoc;
+				console.log(xml);
+				
 				if (!xml) {
 					javascript_abort("The XML file cannot be parsed. Please <a href='" + textMessageXMLFile + "' target='_blank'>review the data</a> before proceeding.");
 				}
