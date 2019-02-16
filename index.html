@@ -60,11 +60,17 @@
 		h5 {clear:both;}
 
 		@media print {
-			div {page-break-inside:avoid;}
+			div {page-break-inside: avoid;}
 			body {
 				background-color:white;
 				color:black;
+				font-size:.75em;
 			}
+            .sent, .received {
+				margin: 2px 10px;
+				max-width:90%;
+            }
+            img {max-width:300px;}
 		}
 	</style>
 	<body>
