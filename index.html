@@ -1,80 +1,6 @@
 <!DOCTYPE html>
 <html>
-	<style>
-		body {
-			background-color:black;
-			color:white;
-		}
-		#results {
-			max-width:90%;
-			margin:auto;
-		}
-		.sent, .received {
-			margin:10px;
-			clear:both;
-			padding:15px;
-			max-width:75%;
-			text-align:justify;
-			color:black;
-		}
-		.received {
-			background-color:lightgrey;
-			float:left;
-			-moz-border-radius: 0 20px 20px;
-			-webkit-border-radius: 0 20px 20px;
-			-khtml-border-radius: 0 20px 20px;
-			border-radius: 0 20px 20px;
-		}
-		.sent {
-			background-color:lightblue;
-			float:right;
-			-moz-border-radius: 20px 0 20px 20px;
-			-webkit-border-radius: 20px 0 20px 20px;
-			-khtml-border-radius: 20px 0 20px 20px;
-			border-radius: 20px 0 20px 20px;
-		}
-		.details {font-weight:bold;}
-		.sent .details {float:right;}
-		.error {
-			color:red;
-			text-align:center;
-			font-size:x-large;
-			margin:50px 0;
-		}
-		.error a {color:white;}
-		img {
-			max-width:400px;
-			margin-top:5px;
-		}
-		img:not(.loading) {border:1px solid darkslategray;}
-		img.loading {
-			width:64px;
-			margin:100px auto;
-			display:block;
-		}
-		img:not(.loading):hover {
-			-ms-transform: scale(1.5);
-			-webkit-transform: scale(1.5);
-			transform: scale(1.5); 
-		}
-		h5 {clear:both;}
-
-		@media print {
-			div {page-break-inside: avoid;}
-			body {
-				background-color:white;
-				color:black;
-				font-size:.75em;
-			}
-            .sent, .received {
-				margin: 2px 10px;
-				max-width:90%;
-            }
-            img {max-width:300px;}
-		}
-	</style>
-	<body>
-		<div id="results"></div>
+	<head>
 		<script>
 			/********** Enter Your Values Here **********/
 			
@@ -85,26 +11,27 @@
 
 			/******* Don't Modify Below This Line *******/
 
-			var results = document.getElementById('results');
-			if (!textMessageXMLFile) {javascript_abort("You need to enter an XML filename for the textMessageXMLFile variable.");}
-			loadingGIFImageFile ? results.innerHTML = "<img class='loading' src='" + loadingGIFImageFile + "'>" : ''; 
-			
-			try {
-				var xhttp = new XMLHttpRequest();
-				xhttp.open("GET", textMessageXMLFile, true);
-				xhttp.responseType = "text";	/* text = text; document = XML;	*/
-				xhttp.onreadystatechange = function() {
-					if (this.readyState == 4 && this.status == 200) {parseTextMessagesXML(this);}
-				};
-				xhttp.onerror = function() {console.log("Error loading XML.");};
-				xhttp.onloadend = function() {
-					if(xhttp.status == 404) {javascript_abort("The XML file '" + textMessageXMLFile + "' does not exist.");}
-				}
-				xhttp.send();
-			} catch (err) {
-				results.innerHTML = err.message;
-			}
+			window.onload = function runScript(){
+				var results = document.getElementById('results');
+				if (!textMessageXMLFile) {javascript_abort("You need to enter an XML filename for the textMessageXMLFile variable.");}
+				loadingGIFImageFile ? results.innerHTML = "<img class='loading' src='" + loadingGIFImageFile + "'>" : ''; 
 				
+				try {
+					var xhttp = new XMLHttpRequest();
+					xhttp.open("GET", textMessageXMLFile, true);
+					xhttp.responseType = "text";	/* text = text; document = XML;	*/
+					xhttp.onreadystatechange = function() {
+						if (this.readyState == 4 && this.status == 200) {parseTextMessagesXML(this);}
+					};
+					xhttp.onerror = function() {console.log("Error loading XML.");};
+					xhttp.onloadend = function() {
+						if(xhttp.status == 404) {javascript_abort("The XML file '" + textMessageXMLFile + "' does not exist.");}
+					}
+					xhttp.send();
+				} catch (err) {
+					results.innerHTML = err.message;
+				}
+			}
 				
 			function parseTextMessagesXML(xml) {
 				var i, x, y, z, messages = [], temp, type, html;
@@ -217,5 +144,84 @@
 				document.getElementById('results').innerHTML = "<div class='error'>ERROR: " + msg + "</div>";
 			}
 		</script>
+		<style>
+			@media screen {
+				body {
+					background-color:black;
+					color:white;
+				}
+				#results {
+					max-width:90%;
+					margin:auto;
+				}
+				.sent, .received {
+					margin:10px;
+					clear:both;
+					padding:15px;
+					max-width:75%;
+					text-align:justify;
+					color:black;
+				}
+				.received {
+					background-color:lightgrey;
+					float:left;
+					-moz-border-radius: 0 20px 20px;
+					-webkit-border-radius: 0 20px 20px;
+					-khtml-border-radius: 0 20px 20px;
+					border-radius: 0 20px 20px;
+				}
+				.sent {
+					background-color:lightblue;
+					float:right;
+					-moz-border-radius: 20px 0 20px 20px;
+					-webkit-border-radius: 20px 0 20px 20px;
+					-khtml-border-radius: 20px 0 20px 20px;
+					border-radius: 20px 0 20px 20px;
+				}
+				.details {font-weight:bold;}
+				.sent .details {float:right;}
+				.error {
+					color:red;
+					text-align:center;
+					font-size:x-large;
+					margin:50px 0;
+				}
+				.error a {color:white;}
+				img {
+					max-width:400px;
+					margin-top:5px;
+				}
+				img:not(.loading) {border:1px solid darkslategray;}
+				img.loading {
+					width:64px;
+					margin:100px auto;
+					display:block;
+				}
+				img:not(.loading):hover {
+					-ms-transform: scale(1.5);
+					-webkit-transform: scale(1.5);
+					transform: scale(1.5); 
+				}
+				h5 {clear:both;}
+			}
+
+			@media print {
+				div {page-break-inside: avoid;}
+				body {
+					background-color:white;
+					color:black;
+					font-size:.75em;
+				}
+				.sent, .received {
+					margin: 2px 10px;
+					max-width:90%;
+				}
+				img {max-width:300px;}
+			}
+		</style>
+		<title>SMS XML Parser</title>
+	</head>
+	<body>
+		<div id='results'></div>
 	</body>
 </html>
