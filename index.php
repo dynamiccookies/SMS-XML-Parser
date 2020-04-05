@@ -85,7 +85,60 @@
 <html>
     <head>
         <title>SMS XML Parser</title>
-        <link rel='stylesheet' type='text/css' href='phpstyle.css'>
+        <style>
+            body {
+            	background-color:black;
+            	color:white;
+            	margin:auto;
+            	max-width:90%;
+            }
+            img {
+                border:1px solid darkslategray;
+            	margin-top:5px;
+            	max-width:400px;
+            }
+            img:hover {
+            	-moz-transform: scale(1.5);
+            	-ms-transform: scale(1.5);
+            	-o-transform: scale(1.5);
+            	-webkit-transform: scale(1.5);
+            	transform: scale(1.5);
+            }
+            .details {font-weight:bold;}
+            .received {
+            	-khtml-border-radius: 0 20px 20px;
+            	-moz-border-radius: 0 20px 20px;
+            	-webkit-border-radius: 0 20px 20px;
+            	background-color:lightgrey;
+            	border-radius: 0 20px 20px;
+            	float:left;
+            }
+            .sent, .received {
+            	clear:both;
+            	color:black;
+            	margin:10px;
+            	max-width:75%;
+            	padding:15px;
+            	text-align:justify;
+            }
+            .sent {
+            	-khtml-border-radius: 20px 0 20px 20px;
+            	-moz-border-radius: 20px 0 20px 20px;
+            	-webkit-border-radius: 20px 0 20px 20px;
+            	background-color:lightblue;
+            	border-radius: 20px 0 20px 20px;
+            	float:right;
+            }
+            .sent .details {float:right;}
+
+            @media print {
+            	body {
+            		background-color:white;
+            		color:black;
+            	}
+            	div {page-break-inside:avoid;}
+            }
+        </style>
     </head>
     <body>
         <h1>Text Message History</h1>
