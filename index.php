@@ -26,12 +26,12 @@
             else {$type = 'notype';}
 
 			$msgs[] = array(
-				'type'=>$type,
-				'text'=>$reader->getAttribute('body'),
-				'date'=>$reader->getAttribute('date'),
-				'address'=>formatPhoneNumber($reader->getAttribute('address')),
-				'contact_name'=>$reader->getAttribute('contact_name'),
-				'readable_date'=>$reader->getAttribute('readable_date')
+				'type'          => $type,
+				'text'          => $reader->getAttribute('body'),
+				'date'          => $reader->getAttribute('date'),
+				'address'       => formatPhoneNumber($reader->getAttribute('address')),
+				'contact_name'  => $reader->getAttribute('contact_name'),
+				'readable_date' => $reader->getAttribute('readable_date')
 			);
 
         } elseif ($reader->nodeType == XMLReader::ELEMENT && ($reader->name == 'mms')) {
@@ -51,12 +51,12 @@
 			if (!$rcvNum) {foreach ($node->addrs->addr as $addr) {if ($addr['type'] == '151') {$rcvNum = formatPhoneNumber($addr['address']);}}}
 
 			$msgs[] = array(
-				'type'=>$type,
-				'text'=>$body,
-				'date'=>$reader->getAttribute('date'),
-				'address'=>formatPhoneNumber($reader->getAttribute('address')),
-				'contact_name'=>$reader->getAttribute('contact_name'),
-				'readable_date'=>$reader->getAttribute('readable_date')
+				'type'          => $type,
+				'text'          => $body,
+				'date'          => $reader->getAttribute('date'),
+				'address'       => formatPhoneNumber($reader->getAttribute('address')),
+				'contact_name'  => $reader->getAttribute('contact_name'),
+				'readable_date' => $reader->getAttribute('readable_date')
 			);
         }
     }
@@ -157,8 +157,7 @@
 				echo "\t\t<div class='" . $msg['type'] . "'><span class='details'>" . $msg['readable_date'];
 				if ($msg['type'] == 'received') {echo ' - ' . $msg['contact_name'] . ' - ' . $msg['address'];}
 				elseif ($msg['type'] == 'sent') {echo ' - Me' . ($rcvNum ? ' - ' . $rcvNum : '');}
-
-				print_r('</span><br>' . $msg['text'] . "</div>\n");
+                print_r('</span><br>' . $msg['text'] . "</div>\n");
 			}
 		?>
     </body>
