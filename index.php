@@ -23,7 +23,7 @@
 
             if ($reader->getAttribute('type') == 1)     {$type = 'received';}
             elseif ($reader->getAttribute('type') == 2) {$type = 'sent';}
-            else {$type = '';}
+            else {$type = 'notype';}
 
 			$msgs[] = array(
 				'type'=>$type,
@@ -38,13 +38,13 @@
 
             if ($reader->getAttribute('msg_box') == 1)     {$type = 'received';}
             elseif ($reader->getAttribute('msg_box') == 2) {$type = 'sent';}
-            else {$type = '';}
+            else {$type = 'notype';}
 
 			$body = '';
             $node = simplexml_import_dom($doc->importNode($reader->expand(), true));
             foreach ($node->parts->part as $part) {
-                if ($part['ct'] == 'image/png') 	{$body .= "<img src='data:image/png;base64, " . $part['data'] . "'><br>";}
-				elseif ($part['ct'] == 'image/jpeg'){$body .= "<img src='data:image/jpeg;base64, " . $part['data'] . "'><br>";}
+                if  ($part['ct'] == 'image/png') 	{$body .= "<img src='data:image/png;base64, " . $part['data'] . "' alt='" . $part['name'] . "'><br>";}
+				elseif ($part['ct'] == 'image/jpeg'){$body .= "<img src='data:image/jpeg;base64, " . $part['data'] . "' alt='" . $part['name'] . "'><br>";}
 				elseif ($part['ct'] == 'text/plain'){$body .= $part['text'] . '<br>';}
             }
 
@@ -154,8 +154,7 @@
         <h1>Text Message History</h1>
         <?php
 			foreach ($msgs as $msg) {
-				echo "\t\t<div class='" . ($msg['type']?:'notype') . "'><span class='details'>" . $msg['readable_date'];
-
+				echo "\t\t<div class='" . $msg['type'] . "'><span class='details'>" . $msg['readable_date'];
 				if ($msg['type'] == 'received') {echo ' - ' . $msg['contact_name'] . ' - ' . $msg['address'];}
 				elseif ($msg['type'] == 'sent') {echo ' - Me' . ($rcvNum ? ' - ' . $rcvNum : '');}
 
