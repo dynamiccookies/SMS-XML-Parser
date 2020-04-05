@@ -102,7 +102,16 @@
             	-ms-transform: scale(1.5);
             	-o-transform: scale(1.5);
             	-webkit-transform: scale(1.5);
+                transition: 
+					-ms-transform 1.5s, 
+					-moz-transform 1.5s, 
+					-o-transform 1.5s, 
+					-webkit-transform 1.5s, 
+					transform 1.5s;
+                transition-delay: 1s;
+                transition-timing-function: ease-in-out;
             	transform: scale(1.5);
+                transform-origin: top left;
             }
             .details {font-weight:bold;}
             .received {
@@ -130,6 +139,7 @@
             	float:right;
             }
             .sent .details {float:right;}
+            .sent img:hover {transform-origin: top right;}
 
             @media print {
             	body {
