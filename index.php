@@ -75,10 +75,10 @@
     }
 
     function formatPhoneNumber($number){
-        $number = preg_replace('/\D/', '', $number);
-        preg_match('/(\d{3})(\d{3})(\d{4})$/', $number, $trimmed);
+        $clean = preg_replace('/\D/', '', $number);
+        preg_match('/^(\d{3})(\d{3})(\d{4})$/', $clean, $trimmed);
         if ($trimmed) {return '(' . $trimmed[1] . ') ' . $trimmed[2] . '-' . $trimmed[3];}
-        else {return '(' . $number . ')';}
+        else {return $number;}
     }
 ?>
 <!doctype html>
