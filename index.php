@@ -4,6 +4,14 @@
     $rcvNum = '';
 
     if (isset($_POST['upload'])) {$msgs = parseFile($_FILES['xmlfile']['tmp_name']);}
+    if (isset($_POST['urlSubmit'])) {
+        $url = $_POST['url'];
+        if (strpos($url,'google.com') !== false) {
+            preg_match('/[A-z_0-9]{33}/', $url, $ID);
+            $url = 'https://drive.google.com/uc?id=' . $ID[0] . '&export=download';
+        }
+        $msgs = parseFile($url);
+    }
 
     function parseFile($filename) {
         $file    = file_get_contents($filename);
@@ -45,7 +53,8 @@
     				elseif ($part['ct'] == 'image/jpeg'){$body .= "<img src='data:image/jpeg;base64, " . $part['data'] . "' alt='" . $part['name'] . "'><br>";}
     				elseif ($part['ct'] == 'text/plain'){$body .= $part['text'] . '<br>';}
                 }
-    
+
+				global $rcvNum;
     			if (!$rcvNum) {foreach ($node->addrs->addr as $addr) {if ($addr['type'] == '151') {$rcvNum = formatPhoneNumber($addr['address']);}}}
     
     			$msgs[] = array(
@@ -92,6 +101,7 @@
             	margin: auto;
             	max-width: 90%;
             }
+            form {margin: 20px;}
             img {
                 border: 1px solid darkslategray;
             	margin-top: 5px;
@@ -113,6 +123,7 @@
             	transform: scale(1.5);
                 transform-origin: top left;
             }
+            input[type='text'] {width: 253px;}
             .details {font-weight: bold;}
             .received {
             	-khtml-border-radius: 0 20px 20px;
@@ -164,6 +175,10 @@
             <form name='fileUpload' method='post' action='' enctype='multipart/form-data'>
         		<input type='file' name='xmlfile' accept='.xml,xml/*,text/xml'>
         		<input type='submit' name='upload' value='Upload'>
+    		</form>
+    		<form name='URLUpload' method='post' action='' enctype='multipart/form-data'>
+    		    <input type='text' name='url'>
+    		    <input type='submit' name='urlSubmit' value='Upload'>
     		</form>
         </div>
         <?php if ($msgs){?>
