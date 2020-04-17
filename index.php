@@ -160,12 +160,14 @@
             .sent .details {float: right;}
             .sent img:hover {transform-origin: top right;}
             #uploadForm {
-                background-color: #eee;
-                border-radius: 10px;
-                color: black;
-                margin: 20px;
-                padding: 20px;
-                text-align: center;
+				background-color: lightgrey;
+				border: 5px solid darkgray;
+				border-radius: 10px;
+				color: black;
+				margin: 20px auto;
+				padding: 20px;
+				text-align: center;
+				width: 50%;
             }
 
             @media print {
