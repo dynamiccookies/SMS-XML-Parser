@@ -1,7 +1,8 @@
 <?php
 
-    $msgs = array();
-    $rcvNum = '';
+    $msgs    = array();
+    $rcvNum  = '';
+    $rcvName = '';
 
     if (isset($_POST['upload'])) {$msgs = parseFile($_FILES['xmlfile']['tmp_name']);}
     if (isset($_POST['urlSubmit'])) {
@@ -12,6 +13,7 @@
         }
         $msgs = parseFile($url);
     }
+	if (isset($_POST['runExample'])) {$msgs = parseFile('example.xml');}
 
     function parseFile($filename) {
         $file    = file_get_contents($filename);
@@ -54,9 +56,15 @@
     				elseif ($part['ct'] == 'text/plain'){$body .= $part['text'] . '<br>';}
                 }
 
-				global $rcvNum;
-    			if (!$rcvNum) {foreach ($node->addrs->addr as $addr) {if ($addr['type'] == '151') {$rcvNum = formatPhoneNumber($addr['address']);}}}
-    
+    			if (!$GLOBALS['rcvNum']) {
+    			    foreach ($node->addrs->addr as $addr) {
+        			    if ($addr['type'] == '151') {
+        			        $GLOBALS['rcvNum']  = formatPhoneNumber($addr['address']);
+        			        $GLOBALS['rcvName'] = (string) ($addr['contact_name'] ?: $GLOBALS['rcvName']);
+                        }
+    			    }
+    			}
+
     			$msgs[] = array(
     				'type'          => $type,
     				'text'          => $body,
@@ -180,6 +188,9 @@
     		    <input type='text' name='url'>
     		    <input type='submit' name='urlSubmit' value='Upload'>
     		</form>
+    		<form name='example' method='post' action='' enctype='multipart/form-data'>
+    		    <input type='submit' name='runExample' value='Run Example'>
+    		</form>
         </div>
         <?php if ($msgs){?>
             <h1>Text Message History</h1>
@@ -187,7 +198,7 @@
     			foreach ($msgs as $msg) {
     				echo "\t\t<div class='" . $msg['type'] . "'><span class='details'>" . $msg['readable_date'];
     				if ($msg['type'] == 'received') {echo ' - ' . $msg['contact_name'] . ' - ' . $msg['address'];}
-    				elseif ($msg['type'] == 'sent') {echo ' - Me' . ($rcvNum ? ' - ' . $rcvNum : '');}
+    				elseif ($msg['type'] == 'sent') {echo ' - ' . ($rcvName ?: 'Me') . ($rcvNum ? ' - ' . $rcvNum : '');}
                     print_r('</span><br>' . $msg['text'] . "</div>\n");
     			}
     		?>
