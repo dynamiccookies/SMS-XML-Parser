@@ -8,7 +8,7 @@
     if (isset($_POST['urlSubmit'])) {
         $url = $_POST['url'];
         if (strpos($url,'google.com') !== false) {
-            preg_match('/[A-z_0-9]{33}/', $url, $ID);
+            preg_match('/[A-z_\-0-9]{33}/', $url, $ID);
             $url = 'https://drive.google.com/uc?id=' . $ID[0] . '&export=download';
         }
         $msgs = parseFile($url);
@@ -75,11 +75,11 @@
     			);
             }
         }
-    
-		$reader->close();
-		unlink($tmpfile);
-		array_multisort(array_column($msgs, 'date'), $msgs);
-		return $msgs;
+
+        $reader->close();
+        unlink($tmpfile);
+        array_multisort(array_column($msgs, 'date'), $msgs);
+        return $msgs;
     }
 
     function convertToEmoji($matches){
@@ -185,7 +185,7 @@
         		<input type='submit' name='upload' value='Upload'>
     		</form>
     		<form name='URLUpload' method='post' action='' enctype='multipart/form-data'>
-    		    <input type='text' name='url'>
+    		    <input type='text' name='url' placeholder='Upload URL'>
     		    <input type='submit' name='urlSubmit' value='Upload'>
     		</form>
     		<form name='example' method='post' action='' enctype='multipart/form-data'>
