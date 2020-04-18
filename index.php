@@ -5,7 +5,7 @@
     $rcvNum          = '';
     $rcvName         = '';
     $url             = (isset($_GET['url']) ? urldecode(htmlspecialchars($_GET['url'])) : '');
-    $_SESSION['tab'] = ($_SESSION['tab'] ?: '');
+    $_SESSION['tab'] = (isset($_SESSION['tab']) ? $_SESSION['tab'] : '');
 
     if (isset($_POST['upload'])) {
 		$_SESSION['tab'] = 'file';
@@ -31,9 +31,16 @@
     function parseFile($filename) {
         $file    = file_get_contents($filename);
         $results = preg_replace_callback('/(&#\d{5};){2}|(&#0;)/', function($matches){return convertToEmoji($matches[0]);}, $file);
-        $tmpfile = $_SERVER['TMPDIR'] . '/' . substr(md5(uniqid()),0,6) . '.xml';
+        $tmpfile = $_SERVER['TMPDIR'] . '/sms' . substr(md5(uniqid()),0,6) . '.xml';
         $reader  = new XMLReader();
         $doc     = new DOMDocument;
+        $tmpdocs = glob($_SERVER['TMPDIR'] . '/sms*.xml');
+
+        foreach($tmpdocs as $tmpdoc){
+            $timeDiff = abs(time() - filemtime($tmpdoc))/(60*60);
+            if(is_file($tmpdoc) && $timeDiff > 24)
+            unlink($tmpdoc);
+        }
 
         file_put_contents($tmpfile,$results);
     
