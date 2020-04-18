@@ -43,9 +43,8 @@
         }
 
         file_put_contents($tmpfile,$results);
-    
         if (!$reader->open($tmpfile)) {die('Failed to open XML file.');}
-    
+
         while($reader->read()) {
             if ($reader->nodeType == XMLReader::ELEMENT && ($reader->name == 'sms')) {
     
@@ -180,6 +179,12 @@
             }
             .sent .details {float: right;}
             .sent img:hover {transform-origin: top right;}
+            #copied {
+                display: none;
+                font-weight: bold;
+                color: crimson;
+                margin: 10px auto;
+            }
             #uploadForm {
 				display: none;
 				background-color: lightgrey;
@@ -265,6 +270,7 @@
     		    <input type='submit' name='urlSubmit' value='Upload'>
     		    <br><br><strong><a href='https://drive.google.com' target='_blank'>Google Drive</a> links supported!</strong>
     		    <? echo ($share ?: '');?>
+    		    <br><span id='copied'>Copied!</span>
     		</form>
     		<form id='example' class='tabcontent' name='example' method='post' action='' enctype='multipart/form-data'>
     		    <input type='submit' name='runExample' value='Run Example'>
@@ -312,7 +318,7 @@
 				copyText.select();
 				copyText.setSelectionRange(0, 99999)
 				document.execCommand('copy');
-				alert("Copied the text: " + copyText.value);
+				document.getElementById('copied').style.display = 'block';
 			}
         </script>
     </body>
