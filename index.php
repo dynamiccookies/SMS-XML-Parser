@@ -261,17 +261,17 @@
 			<button class='tablink righttab' onclick="openTab('example', this, 'right')"<?php echo ($_SESSION['tab'] == 'example' ? " id='defaultTab'":'');?>>Example</button>
             <form id='file' class='tabcontent' name='fileUpload' method='post' action='' enctype='multipart/form-data'>
         		<input type='file' name='xmlfile' accept='.xml,xml/*,text/xml'>
-        		<input type='submit' name='upload' value='Upload'>
+        		<input type='submit' name='upload' value='Upload' id='submitFile' onclick='loading(this.id); return false;'>
     		</form>
     		<form id='URL' class='tabcontent' name='URLUpload' method='post' action='' enctype='multipart/form-data'>
     		    <input type='text' name='url' placeholder='Upload URL'>
-    		    <input type='submit' name='urlSubmit' value='Upload'>
+    		    <input type='submit' name='urlSubmit' value='Upload' id='submitURL' onclick='loading(this.id); return false;'>
     		    <br><br><strong><a href='https://drive.google.com' target='_blank'>Google Drive</a> links supported!</strong>
     		    <? echo ($share ?: '');?>
     		    <br><span id='copied'>Copied!</span>
     		</form>
     		<form id='example' class='tabcontent' name='example' method='post' action='' enctype='multipart/form-data'>
-    		    <input type='submit' name='runExample' value='Run Example'>
+    		    <input type='submit' name='runExample' value='Run Example' id='submitExample' onclick='loading(this.id); return false;'>
     		    <br><br><strong>Download and open the <a href='example.xml' download='example.xml'>example.xml</a> file to see the code before it's parsed.</strong>
     		</form>
         </div>
@@ -317,6 +317,10 @@
 				copyText.setSelectionRange(0, 99999)
 				document.execCommand('copy');
 				document.getElementById('copied').style.display = 'block';
+			}
+			function loading(id) {
+			    document.getElementById('loading').style.display = 'block';
+			    document.getElementById(id).submit();
 			}
         </script>
     </body>
