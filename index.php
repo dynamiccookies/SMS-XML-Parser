@@ -17,7 +17,7 @@
 
     function parseFile($filename) {
         $file    = file_get_contents($filename);
-        $results = preg_replace_callback('/(&#\d{5};){2}/', function($matches){return convertToEmoji($matches);}, $file);
+        $results = preg_replace_callback('/(&#\d{5};){2}|(&#0;)/', function($matches){return convertToEmoji($matches[0]);}, $file);
         $tmpfile = $_SERVER['TMPDIR'] . '/' . substr(md5(uniqid()),0,6) . '.xml';
         $reader  = new XMLReader();
         $doc     = new DOMDocument;
@@ -83,12 +83,14 @@
     }
 
     function convertToEmoji($matches){
-        $newStr     = $matches[0];
-        $newStr     = str_replace('&#', '', $newStr);
-        $myEmoji    = explode(';', $newStr);
-        $newStr     = dechex($myEmoji[0]) . dechex($myEmoji[1]);
-        $newStr     = hex2bin($newStr);
-        return iconv('UTF-16BE', 'UTF-8', $newStr);
+        if ($matches == '&#0;') {return '';}
+        else {
+            $newStr     = str_replace('&#', '', $matches);
+            $myEmoji    = explode(';', $newStr);
+            $newStr     = dechex($myEmoji[0]) . dechex($myEmoji[1]);
+            $newStr     = hex2bin($newStr);
+            return iconv('UTF-16BE', 'UTF-8', $newStr);
+        }
     }
 
     function formatPhoneNumber($number){
