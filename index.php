@@ -1,11 +1,16 @@
 <?php
-
+    session_start();
     $msgs    = array();
     $rcvNum  = '';
     $rcvName = '';
+    $_SESSION['tab'] ?: '';
 
-    if (isset($_POST['upload'])) {$msgs = parseFile($_FILES['xmlfile']['tmp_name']);}
+    if (isset($_POST['upload'])) {
+		$_SESSION['tab'] = 'file';
+		$msgs = parseFile($_FILES['xmlfile']['tmp_name']);
+    }
     if (isset($_POST['urlSubmit'])) {
+        $_SESSION['tab'] = 'URL';
         $url = $_POST['url'];
         if (strpos($url,'google.com') !== false) {
             preg_match('/[A-z_\-0-9]{33}/', $url, $ID);
@@ -13,7 +18,10 @@
         }
         $msgs = parseFile($url);
     }
-	if (isset($_POST['runExample'])) {$msgs = parseFile('example.xml');}
+	if (isset($_POST['runExample'])) {
+		$_SESSION['tab'] = 'example';
+		$msgs = parseFile('example.xml');
+	}
 
     function parseFile($filename) {
         $file    = file_get_contents($filename);
@@ -111,7 +119,6 @@
             	margin: auto;
             	max-width: 90%;
             }
-            form {margin: 20px;}
             img {
                 border: 1px solid darkslategray;
             	margin-top: 5px;
@@ -162,15 +169,37 @@
             .sent .details {float: right;}
             .sent img:hover {transform-origin: top right;}
             #uploadForm {
+				display: none;
 				background-color: lightgrey;
 				border: 5px solid darkgray;
 				border-radius: 10px;
 				color: black;
 				margin: 20px auto;
-				padding: 20px;
-				text-align: center;
 				width: 50%;
             }
+			.tablink {
+				float: left;
+				border: none;
+				outline: none;
+				cursor: pointer;
+				padding: 14px 16px;
+				font-size: 17px;
+				margin: auto;
+			}
+			.tablink:hover {font-weight:bold !important;}
+			.width33 {
+				width: 33.33%;
+				width: calc(100% / 3);
+			}
+        	.tabcontent {
+        		display: none;
+        		padding: 100px 20px 50px;
+        		text-align: center;
+        		background-color: silver;
+        		border-radius: 0px 0px 10px 10px;
+        	}
+        	.lefttab {border-radius: 10px 0 0 0;}
+        	.righttab {border-radius: 0 10px 0 0;}
             .lds-ring {
                 margin: auto;
                 display: block;
@@ -212,16 +241,21 @@
     <body>
         <div id='loading' class='lds-ring'><div></div><div></div><div></div><div></div></div>
         <div id='uploadForm'>
-            <form name='fileUpload' method='post' action='' enctype='multipart/form-data'>
+			<button class='tablink width33 lefttab' onclick="openTab('file', this, 'left')"<?php echo (!$_SESSION['tab'] || $_SESSION['tab'] == 'file' ? " id='defaultTab'":'');?>>Upload File</button>
+			<button class='tablink width33' onclick="openTab('URL', this, 'middle')"<?php echo ($_SESSION['tab'] == 'URL' ? " id='defaultTab'":'');?>>Upload URL</button>
+			<button class='tablink width33 righttab' onclick="openTab('example', this, 'right')"<?php echo ($_SESSION['tab'] == 'example' ? " id='defaultTab'":'');?>>Example</button>
+            <form id='file' class='tabcontent' name='fileUpload' method='post' action='' enctype='multipart/form-data'>
         		<input type='file' name='xmlfile' accept='.xml,xml/*,text/xml'>
         		<input type='submit' name='upload' value='Upload'>
     		</form>
-    		<form name='URLUpload' method='post' action='' enctype='multipart/form-data'>
+    		<form id='URL' class='tabcontent' name='URLUpload' method='post' action='' enctype='multipart/form-data'>
     		    <input type='text' name='url' placeholder='Upload URL'>
     		    <input type='submit' name='urlSubmit' value='Upload'>
+    		    <br><br><strong><a href='https://drive.google.com' target='_blank'>Google Drive</a> links supported!</strong>
     		</form>
-    		<form name='example' method='post' action='' enctype='multipart/form-data'>
+    		<form id='example' class='tabcontent' name='example' method='post' action='' enctype='multipart/form-data'>
     		    <input type='submit' name='runExample' value='Run Example'>
+    		    <br><br><strong>Download and open the <a href='example.xml' download='example.xml'>example.xml</a> file to see the code before it's parsed.</strong>
     		</form>
         </div>
         <?php if ($msgs){?>
@@ -235,5 +269,31 @@
     			}
     		?>
         <?php }?>
+        <script>
+			document.getElementById('loading').style.display = 'none';
+			document.getElementById('uploadForm').style.display = 'block';
+			document.getElementById('defaultTab').click();
+			function openTab(tabName,elmnt,position) {
+				var i, tabcontent, tablinks;
+				tabcontent = document.getElementsByClassName('tabcontent');
+				for (i = 0; i < tabcontent.length; i++) {tabcontent[i].style.display = 'none';}
+				tablinks = document.getElementsByClassName('tablink');
+				for (i = 0; i < tablinks.length; i++) {
+					tablinks[i].style.backgroundColor = '#daecee';
+					tablinks[i].style.fontWeight = 'normal';
+					tablinks[i].style.borderBottom = '1px solid';
+					tablinks[i].style.borderTop = 'none';
+					tablinks[i].style.borderRight = 'none';
+					tablinks[i].style.borderLeft = 'none';
+				}
+				document.getElementById(tabName).style.display = 'block';
+				elmnt.style.backgroundColor = 'silver';
+				elmnt.style.fontWeight = 'bold';
+				elmnt.style.borderBottom = 'none';
+				elmnt.style.borderTop = '3px solid blue';
+				if (position == 'left' || position == 'middle') {elmnt.style.borderRight = '1px solid';}
+				if (position == 'right' || position == 'middle') {elmnt.style.borderLeft = '1px solid';}
+			}
+        </script>
     </body>
 </html>
