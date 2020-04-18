@@ -1,21 +1,26 @@
 <?php
     session_start();
-    $msgs    = array();
-    $rcvNum  = '';
-    $rcvName = '';
-    $_SESSION['tab'] ?: '';
+    $msgs            = array();
+    $share           = '';
+    $rcvNum          = '';
+    $rcvName         = '';
+    $url             = (isset($_GET['url']) ? urldecode(htmlspecialchars($_GET['url'])) : '');
+    $_SESSION['tab'] = ($_SESSION['tab'] ?: '');
 
     if (isset($_POST['upload'])) {
 		$_SESSION['tab'] = 'file';
 		$msgs = parseFile($_FILES['xmlfile']['tmp_name']);
     }
-    if (isset($_POST['urlSubmit'])) {
+    if (isset($_POST['urlSubmit']) || $url) {
+        if (isset($_POST['urlSubmit'])) {$url = urldecode($_POST['url']);}
         $_SESSION['tab'] = 'URL';
-        $url = $_POST['url'];
         if (strpos($url,'google.com') !== false) {
             preg_match('/[A-z_\-0-9]{33}/', $url, $ID);
             $url = 'https://drive.google.com/uc?id=' . $ID[0] . '&export=download';
         }
+        $share = '<br><br><strong>Share:</strong> ' . 
+            "<input id='share' type='text' value='" . $_SERVER['SERVER_NAME'] . $_SERVER['PHP_SELF'] . '?url=' . urlencode($url) . "' onclick='this.select();'>" . 
+            '<button onclick="copyToClipboard(document.getElementById(\'share\').id); return false;">Copy to Clipboard</button>';
         $msgs = parseFile($url);
     }
 	if (isset($_POST['runExample'])) {
@@ -252,6 +257,7 @@
     		    <input type='text' name='url' placeholder='Upload URL'>
     		    <input type='submit' name='urlSubmit' value='Upload'>
     		    <br><br><strong><a href='https://drive.google.com' target='_blank'>Google Drive</a> links supported!</strong>
+    		    <? echo ($share ?: '');?>
     		</form>
     		<form id='example' class='tabcontent' name='example' method='post' action='' enctype='multipart/form-data'>
     		    <input type='submit' name='runExample' value='Run Example'>
@@ -293,6 +299,13 @@
 				elmnt.style.borderTop = '3px solid blue';
 				if (position == 'left' || position == 'middle') {elmnt.style.borderRight = '1px solid';}
 				if (position == 'right' || position == 'middle') {elmnt.style.borderLeft = '1px solid';}
+			}
+			function copyToClipboard(elementID) {
+				var copyText = document.getElementById(elementID);
+				copyText.select();
+				copyText.setSelectionRange(0, 99999)
+				document.execCommand('copy');
+				alert("Copied the text: " + copyText.value);
 			}
         </script>
     </body>
