@@ -202,12 +202,10 @@
 				padding: 14px 16px;
 				font-size: 17px;
 				margin: auto;
-			}
-			.tablink:hover {font-weight:bold !important;}
-			.width33 {
 				width: 33.33%;
 				width: calc(100% / 3);
 			}
+			.tablink:hover {font-weight:bold !important;}
         	.tabcontent {
         		display: none;
         		padding: 100px 20px 50px;
@@ -258,9 +256,9 @@
     <body>
         <div id='loading' class='lds-ring'><div></div><div></div><div></div><div></div></div>
         <div id='uploadForm'>
-			<button class='tablink width33 lefttab' onclick="openTab('file', this, 'left')"<?php echo (!$_SESSION['tab'] || $_SESSION['tab'] == 'file' ? " id='defaultTab'":'');?>>Upload File</button>
-			<button class='tablink width33' onclick="openTab('URL', this, 'middle')"<?php echo ($_SESSION['tab'] == 'URL' ? " id='defaultTab'":'');?>>Upload URL</button>
-			<button class='tablink width33 righttab' onclick="openTab('example', this, 'right')"<?php echo ($_SESSION['tab'] == 'example' ? " id='defaultTab'":'');?>>Example</button>
+			<button class='tablink lefttab' onclick="openTab('file', this, 'left')"<?php echo (!$_SESSION['tab'] || $_SESSION['tab'] == 'file' ? " id='defaultTab'":'');?>>Upload File</button>
+			<button class='tablink' onclick="openTab('URL', this, 'middle')"<?php echo ($_SESSION['tab'] == 'URL' ? " id='defaultTab'":'');?>>Upload URL</button>
+			<button class='tablink righttab' onclick="openTab('example', this, 'right')"<?php echo ($_SESSION['tab'] == 'example' ? " id='defaultTab'":'');?>>Example</button>
             <form id='file' class='tabcontent' name='fileUpload' method='post' action='' enctype='multipart/form-data'>
         		<input type='file' name='xmlfile' accept='.xml,xml/*,text/xml'>
         		<input type='submit' name='upload' value='Upload'>
