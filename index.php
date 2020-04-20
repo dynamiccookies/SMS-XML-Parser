@@ -249,7 +249,7 @@
             		color: black;
             	}
             	div {page-break-inside: avoid;}
-            	#uploadForm {display: none;}
+            	#uploadForm {display: none!important;}
             	#loading {display: none;}
             }
         </style>
