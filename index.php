@@ -279,11 +279,12 @@
         <?php if ($msgs){?>
             <h1>Text Message History</h1>
             <?php
+				$urlRegEx = '/(https?:\/\/([\w_-]+(?:(?:\.[\w_-]+)+))([\w.,@?^=%&:\/~+#-]*[\w@?^=%&\/~+#-])?)/';
     			foreach ($msgs as $msg) {
     				echo "\t\t<div class='" . $msg['type'] . "'><span class='details'>" . $msg['readable_date'];
     				if ($msg['type'] == 'received') {echo ' - ' . $msg['contact_name'] . ' - ' . $msg['address'];}
     				elseif ($msg['type'] == 'sent') {echo ' - ' . ($rcvName ?: 'Me') . ($rcvNum ? ' - ' . $rcvNum : '');}
-                    print_r('</span><br>' . $msg['text'] . "</div>\n");
+                    print_r('</span><br>' . preg_replace($urlRegEx, "<a href='$1' target='_blank'>$1</a>", $msg['text']) . "</div>\n");
     			}
     		?>
         <?php }?>
