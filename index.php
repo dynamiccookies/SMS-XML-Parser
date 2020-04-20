@@ -193,6 +193,7 @@
 				color: black;
 				margin: 20px auto;
 				width: 50%;
+				min-width: 400px;
             }
 			.tablink {
 				float: left;
