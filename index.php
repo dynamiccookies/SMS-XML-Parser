@@ -4,6 +4,7 @@
     $share           = '';
     $rcvNum          = '';
     $rcvName         = '';
+	$example		 = file_exists('example.xml');
     $url             = (isset($_GET['url']) ? urldecode(htmlspecialchars($_GET['url'])) : '');
     $_SESSION['tab'] = (isset($_SESSION['tab']) ? $_SESSION['tab'] : '');
 
@@ -203,10 +204,13 @@
 				padding: 14px 16px;
 				font-size: 17px;
 				margin: auto;
+			}
+			.width33 {
 				width: 33.33%;
 				width: calc(100% / 3);
 			}
-			.tablink:hover {font-weight:bold !important;}
+			.width50 {width: 50%;}
+			.tablink:hover {font-weight:bold!important;}
         	.tabcontent {
         		display: none;
         		padding: 100px 20px 50px;
@@ -257,9 +261,11 @@
     <body>
         <div id='loading' class='lds-ring'><div></div><div></div><div></div><div></div></div>
         <div id='uploadForm'>
-			<button class='tablink lefttab' onclick="openTab('file', this, 'left')"<?php echo (!$_SESSION['tab'] || $_SESSION['tab'] == 'file' ? " id='defaultTab'":'');?>>Upload File</button>
-			<button class='tablink' onclick="openTab('URL', this, 'middle')"<?php echo ($_SESSION['tab'] == 'URL' ? " id='defaultTab'":'');?>>Upload URL</button>
-			<button class='tablink righttab' onclick="openTab('example', this, 'right')"<?php echo ($_SESSION['tab'] == 'example' ? " id='defaultTab'":'');?>>Example</button>
+			<button class='tablink lefttab<?php echo ($example ? ' width33' : ' width50') ?>' onclick="openTab('file', this, 'left')"<?php echo (!$_SESSION['tab'] || $_SESSION['tab'] == 'file' ? " id='defaultTab'":'');?>>Upload File</button>
+			<button class='tablink<?php echo ($example ? ' width33' : ' righttab width50') ?>' onclick="openTab('URL', this, '<?php echo ($example ? 'middle' : 'right');?>')"<?php echo ($_SESSION['tab'] == 'URL' ? " id='defaultTab'":'');?>>Upload URL</button>
+			<?php if ($example) {?>
+				<button class='tablink width33' onclick="openTab('example', this, 'right')"<?php echo ($_SESSION['tab'] == 'example' ? " id='defaultTab'":'');?>>Example</button>
+			<?php }?>
             <form id='file' class='tabcontent' name='fileUpload' method='post' action='' enctype='multipart/form-data'>
         		<input type='file' name='xmlfile' accept='.xml,xml/*,text/xml'>
         		<input type='submit' name='upload' value='Upload' id='submitFile' onclick='loading(this.id); return false;'>
@@ -271,10 +277,12 @@
     		    <? echo ($share ?: '');?>
     		    <br><span id='copied'>Copied!</span>
     		</form>
-    		<form id='example' class='tabcontent' name='example' method='post' action='' enctype='multipart/form-data'>
-    		    <input type='submit' name='runExample' value='Run Example' id='submitExample' onclick='loading(this.id); return false;'>
-    		    <br><br><strong>Download and open the <a href='example.xml' download='example.xml'>example.xml</a> file to see the code before it's parsed.</strong>
-    		</form>
+			<?php if ($example) {?>
+				<form id='example' class='tabcontent' name='example' method='post' action='' enctype='multipart/form-data'>
+					<input type='submit' name='runExample' value='Run Example' id='submitExample' onclick='loading(this.id); return false;'>
+					<br><br><strong>Download and open the <a href='example.xml' download='example.xml'>example.xml</a> file to see the code before it's parsed.</strong>
+				</form>
+			<?php }?>
         </div>
         <?php if ($msgs){?>
             <h1>Text Message History</h1>
@@ -313,8 +321,8 @@
 				if (position == 'left' || position == 'middle') {elmnt.style.borderRight = '1px solid';}
 				if (position == 'right' || position == 'middle') {elmnt.style.borderLeft = '1px solid';}
 			}
-			function copyToClipboard(elementID) {
-				var copyText = document.getElementById(elementID);
+			function copyToClipboard(id) {
+				var copyText = document.getElementById(id);
 				copyText.select();
 				copyText.setSelectionRange(0, 99999)
 				document.execCommand('copy');
