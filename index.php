@@ -21,7 +21,7 @@
         }
         $share = '<br><br><strong>Share:</strong> ' . 
             "<input id='share' type='text' value='" . $_SERVER['SERVER_NAME'] . $_SERVER['PHP_SELF'] . '?url=' . urlencode($url) . "' onclick='this.select();'>" . 
-            '<button onclick="copyToClipboard(document.getElementById(\'share\').id); return false;">Copy to Clipboard</button>';
+            '<button onclick="copyToClipboard(document.getElementById(\'share\').id); return false;">Copy Link</button>';
         $msgs = parseFile($url);
     }
 	if (isset($_POST['runExample'])) {
@@ -251,10 +251,16 @@
             	body {
             		background-color: white;
             		color: black;
+					font-size: .75em;
             	}
             	div {page-break-inside: avoid;}
             	#uploadForm {display: none!important;}
             	#loading {display: none;}
+				.sent, .received {
+					margin: 2px 10px;
+					max-width: 90%;
+				}
+				img {max-width: 300px;}
             }
         </style>
     </head>
@@ -318,8 +324,8 @@
 				elmnt.style.fontWeight = 'bold';
 				elmnt.style.borderBottom = 'none';
 				elmnt.style.borderTop = '3px solid blue';
-				if (position == 'left' || position == 'middle') {elmnt.style.borderRight = '1px solid';}
-				if (position == 'right' || position == 'middle') {elmnt.style.borderLeft = '1px solid';}
+				if (position == 'left'  || position == 'middle') {elmnt.style.borderRight = '1px solid';}
+				if (position == 'right' || position == 'middle') {elmnt.style.borderLeft  = '1px solid';}
 			}
 			function copyToClipboard(id) {
 				var copyText = document.getElementById(id);
