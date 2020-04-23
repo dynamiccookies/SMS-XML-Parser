@@ -267,10 +267,28 @@
     <body>
         <div id='loading' class='lds-ring'><div></div><div></div><div></div><div></div></div>
         <div id='uploadForm'>
-			<button class='tablink lefttab<?php echo ($example ? ' width33' : ' width50') ?>' onclick="openTab('file', this, 'left')"<?php echo (!$_SESSION['tab'] || $_SESSION['tab'] == 'file' ? " id='defaultTab'":'');?>>Upload File</button>
-			<button class='tablink<?php echo ($example ? ' width33' : ' righttab width50') ?>' onclick="openTab('URL', this, '<?php echo ($example ? 'middle' : 'right');?>')"<?php echo ($_SESSION['tab'] == 'URL' ? " id='defaultTab'":'');?>>Upload URL</button>
+			<button 
+				class='tablink lefttab<?php echo ($example ? ' width33' : ' width50') ?>' 
+				onclick="openTab('file', this, 'left')"
+				<?php 
+					if (
+						!$_SESSION['tab'] or 
+						$_SESSION['tab'] == 'file' or 
+						(!$example and $_SESSION['tab'] == 'example')
+					) {echo " id='defaultTab'";}
+				?>
+			>Upload File</button>
+			<button 
+				class='tablink<?php echo ($example ? ' width33' : ' righttab width50') ?>' 
+				onclick="openTab('URL', this, '<?php echo ($example ? 'middle' : 'right');?>')"
+				<?php echo ($_SESSION['tab'] == 'URL' ? " id='defaultTab'":'');?>
+			>Upload URL</button>
 			<?php if ($example) {?>
-				<button class='tablink width33' onclick="openTab('example', this, 'right')"<?php echo ($_SESSION['tab'] == 'example' ? " id='defaultTab'":'');?>>Example</button>
+				<button 
+					class='tablink width33' 
+					onclick="openTab('example', this, 'right')"
+					<?php echo ($_SESSION['tab'] == 'example' ? " id='defaultTab'":'');?>
+				>Example</button>
 			<?php }?>
             <form id='file' class='tabcontent' name='fileUpload' method='post' action='' enctype='multipart/form-data'>
         		<input type='file' name='xmlfile' accept='.xml,xml/*,text/xml'>
