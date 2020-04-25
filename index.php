@@ -7,6 +7,7 @@
 	$example		 = file_exists('example.xml');
     $url             = (isset($_GET['url']) ? urldecode(htmlspecialchars($_GET['url'])) : '');
     $_SESSION['tab'] = (isset($_SESSION['tab']) ? $_SESSION['tab'] : '');
+    $thisVersion     = 'v0.1.0';
 
     if (isset($_POST['upload'])) {
 		$_SESSION['tab'] = 'file';
@@ -119,6 +120,21 @@
         if ($trimmed) {return '(' . $trimmed[1] . ') ' . $trimmed[2] . '-' . $trimmed[3];}
         else {return $number;}
     }
+
+	function checkVersion($thisVersion) {
+		$releasePath = 'https://github.com/dynamiccookies/SMS-XML-Parser/releases/latest';
+		$ch = curl_init();
+		curl_setopt($ch, CURLOPT_URL, 'https://api.github.com/repos/dynamiccookies/SMS-XML-Parser/releases/latest'); 
+		curl_setopt($ch, CURLOPT_USERAGENT, 'dynamiccookies/SMS-XML-Parser');
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+		$latestRelease = json_decode(curl_exec($ch), true)['tag_name'];
+		curl_close($ch);
+		if (strcmp($thisVersion, $latestRelease) < 0) {
+			return ' <mark id="version" style="font-weight:bold;">A <a href="' . $releasePath . '" target="_blank">new release (' . $latestRelease . ')</a> is available.</mark>';
+		} else if (strcmp($thisVersion, $latestRelease) > 0) {
+			return ' <mark id="version"><strong style="color:red;">BETA VERSION (' . $thisVersion . ')</strong> - This version is not a <a href="' . $releasePath . '" target="_blank">supported release</a>.</mark>';
+		} else {return '';}
+	}
 ?>
 <!doctype html>
 <html>
@@ -185,6 +201,7 @@
                 font-weight: bold;
                 color: crimson;
                 margin: 10px auto;
+             #version {float: right;}
             }
             #uploadForm {
 				display: none;
@@ -265,6 +282,7 @@
         </style>
     </head>
     <body>
+		<div>SMS XML Parser <?php echo $thisVersion . checkVersion($thisVersion);?></div>
         <div id='loading' class='lds-ring'><div></div><div></div><div></div><div></div></div>
         <div id='uploadForm'>
 			<button 

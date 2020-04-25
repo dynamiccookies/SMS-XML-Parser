@@ -123,6 +123,12 @@ This project converts the backup file of a phone's text messages from XML into a
 ## & After
 ![SMS HTML Results](http://dynamiccookies.com/smsxml/results.png "SMS HTML Results")
 <br><br><br>
+## Upgrading
+
+The PHP script will automatically check for new releases and notify you when there's one to install. 
+
+To install, for both solutions, simply download the latest release and replace the outdated files on your computer or server.
+<br><br><br>
 ## License
 
 This project uses the following license: [MIT](LICENSE).
