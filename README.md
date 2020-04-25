@@ -19,6 +19,7 @@ This project converts the backup file of a phone's text messages from XML into a
   	- [JavaScript Version](#javascript-version-1)
 - [Before...](#before)
 - [& After](#-after)
+- [Upgrading](#upgrading)
 - [License](#license)
 <br><br><br>
 ## Features
