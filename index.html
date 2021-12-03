@@ -14,7 +14,7 @@
 			window.onload = function runScript(){
 				var results = document.getElementById('results');
 				if (!textMessageXMLFile) {javascript_abort("You need to enter an XML filename for the textMessageXMLFile variable.");}
-				loadingGIFImageFile ? results.innerHTML = "<img class='loading' src='" + loadingGIFImageFile + "'>" : ''; 
+				results.innerHTML = "<div id='loading' class='lds-ring'><div></div><div></div><div></div><div></div></div>"; 
 				
 				try {
 					var xhttp = new XMLHttpRequest();
@@ -146,76 +146,97 @@
 		<style>
 			@media screen {
 				body {
-					background-color:black;
-					color:white;
+					background-color: black;
+					color: white;
 				}
 				#results {
-					max-width:90%;
-					margin:auto;
+					max-width: 90%;
+					margin: auto;
 				}
 				.sent, .received {
-					margin:10px;
-					clear:both;
-					padding:15px;
-					max-width:75%;
-					text-align:justify;
-					color:black;
+					margin: 10px;
+					clear: both;
+					padding: 15px;
+					max-width: 75%;
+					text-align: justify;
+					color: black;
 				}
 				.received {
-					background-color:lightgrey;
-					float:left;
+					background-color: lightgrey;
+					float: left;
 					-moz-border-radius: 0 20px 20px;
 					-webkit-border-radius: 0 20px 20px;
 					-khtml-border-radius: 0 20px 20px;
 					border-radius: 0 20px 20px;
 				}
 				.sent {
-					background-color:lightblue;
-					float:right;
+					background-color: lightblue;
+					float: right;
 					-moz-border-radius: 20px 0 20px 20px;
 					-webkit-border-radius: 20px 0 20px 20px;
 					-khtml-border-radius: 20px 0 20px 20px;
 					border-radius: 20px 0 20px 20px;
 				}
-				.details {font-weight:bold;}
-				.sent .details {float:right;}
+				.details {font-weight: bold;}
+				.sent .details {float: right;}
 				.error {
-					color:red;
-					text-align:center;
-					font-size:x-large;
-					margin:50px 0;
+					color: red;
+					text-align: center;
+					font-size: x-large;
+					margin: 50px 0;
 				}
-				.error a {color:white;}
+				.error a {color: white;}
 				img {
-					max-width:400px;
-					margin-top:5px;
+					max-width: 400px;
+					margin-top: 5px;
 				}
-				img:not(.loading) {border:1px solid darkslategray;}
-				img.loading {
-					width:64px;
-					margin:100px auto;
-					display:block;
-				}
-				img:not(.loading):hover {
+				img {border: 1px solid darkslategray;}
+				img:hover {
 					-ms-transform: scale(1.5);
 					-webkit-transform: scale(1.5);
 					transform: scale(1.5); 
 				}
-				h5 {clear:both;}
+				h5 {clear: both;}
+				.lds-ring {
+					margin: auto;
+					display: block;
+					position: relative;
+					width: 80px;
+					height: 80px;
+				}
+				.lds-ring div {
+					box-sizing: border-box;
+					display: block;
+					position: absolute;
+					width: 64px;
+					height: 64px;
+					margin: 8px;
+					border: 8px solid #fff;
+					border-radius: 50%;
+					animation: lds-ring 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+					border-color: #fff transparent transparent transparent;
+				}
+				.lds-ring div:nth-child(1) {animation-delay: -0.45s;}
+				.lds-ring div:nth-child(2) {animation-delay: -0.3s;}
+				.lds-ring div:nth-child(3) {animation-delay: -0.15s;}
+				@keyframes lds-ring {
+					0%   {transform: rotate(0deg);}
+					100% {transform: rotate(360deg);}
+				}
 			}
 
 			@media print {
 				div {page-break-inside: avoid;}
 				body {
-					background-color:white;
-					color:black;
-					font-size:.75em;
+					background-color: white;
+					color: black;
+					font-size: .75em;
 				}
 				.sent, .received {
 					margin: 2px 10px;
-					max-width:90%;
+					max-width: 90%;
 				}
-				img {max-width:300px;}
+				img {max-width: 300px;}
 			}
 		</style>
 		<title>SMS XML Parser</title>

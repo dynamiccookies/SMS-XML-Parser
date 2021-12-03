@@ -2,17 +2,17 @@
 	session_start();
 
 	$_SESSION['tab'] = (isset($_SESSION['tab']) ? $_SESSION['tab'] : '');
-	$example         = file_exists('example.xml');
-	$msgs            = array();
-	$rcvName         = '';
-	$rcvNum          = '';
+	$example_exists  = file_exists('example.xml');
+	$messages        = array();
+	$received_name   = '';
+	$received_number = '';
 	$share           = '';
-	$thisVersion     = 'v0.1.0';
+	$this_version    = 'v0.1.0';
 	$url             = (isset($_GET['url']) ? urldecode(htmlspecialchars($_GET['url'])) : '');
 
 	if (isset($_POST['upload'])) {
 		$_SESSION['tab'] = 'file';
-		$msgs 			 = parseFile($_FILES['xmlfile']['tmp_name']);
+		$messages        = parseFile($_FILES['xmlfile']['tmp_name']);
 	}
 	if (isset($_POST['urlSubmit']) || $url) {
 		$_SESSION['tab'] = 'URL';
@@ -21,20 +21,28 @@
 			preg_match('/[A-z_\-0-9]{33}/', $url, $ID);
 			$url = 'https://drive.google.com/uc?id=' . $ID[0] . '&export=download';
 		}
-		$msgs  = parseFile($url);
-		$share = '<br><br><strong>Share:</strong> ' . "<input id='share' type='text' value='" . $_SERVER['SERVER_NAME'] . $_SERVER['PHP_SELF'] . '?url=' . urlencode($url) . 
+		$messages = parseFile($url);
+		$share    = '<br><br><strong>Share:</strong> ' . "<input id='share' type='text' value='" . $_SERVER['SERVER_NAME'] . $_SERVER['PHP_SELF'] . '?url=' . urlencode($url) . 
 			"' onclick='this.select();'>" . '<button onclick="copyToClipboard(document.getElementById(\'share\').id); return false;">Copy Link</button>';
 	}
 	if (isset($_POST['runExample'])) {
 		$_SESSION['tab'] = 'example';
-		$msgs            = parseFile('example.xml');
+		$messages        = parseFile('example.xml');
 	}
 
 	function parseFile($filename) {
 		$doc     = new DOMDocument;
 		$file    = file_get_contents($filename);
 		$reader  = new XMLReader();
-		$results = preg_replace_callback('/(&#\d{5};){2}|(&#0;)/', function($matches){return convertToEmoji($matches[0]);}, $file);
+		$results = preg_replace_callback(
+			'/&#(\d{5});&#(\d{5});|(&#0;)/',
+			function($matches) {
+				if ($matches[0] == '&#0;') {return ' ';}
+				else {return iconv('UTF-16BE', 'UTF-8', hex2bin(dechex($matches[1]) . dechex($matches[2])));}
+			},
+			$file
+		);
+
 		$tmpdocs = glob($_SERVER['TMPDIR'] . '/sms*.xml');
 		$tmpfile = $_SERVER['TMPDIR'] . '/sms' . substr(md5(uniqid()),0,6) . '.xml';
 
@@ -42,16 +50,16 @@
 			$timeDiff = abs(time() - filemtime($tmpdoc))/(60*60);
 			if(is_file($tmpdoc) && $timeDiff > 24) {unlink($tmpdoc);}
 		}
-		file_put_contents($tmpfile,$results);
+		file_put_contents($tmpfile, $results);
 		if (!$reader->open($tmpfile)) {die('Failed to open XML file.');}
 
-		while($reader->read()) {
+		while ($reader->read()) {
 			if ($reader->nodeType == XMLReader::ELEMENT && ($reader->name == 'sms')) {
 				if     ($reader->getAttribute('type') == 1) {$type = 'received';}
 				elseif ($reader->getAttribute('type') == 2) {$type = 'sent';}
 				else {$type = 'notype';}
 
-				$msgs[] = array(
+				$messages[] = array(
 					'address'       => formatPhoneNumber($reader->getAttribute('address')),
 					'contact_name'  => $reader->getAttribute('contact_name'),
 					'date'          => $reader->getAttribute('date'),
@@ -73,16 +81,16 @@
 					elseif ($part['ct'] == 'text/plain') {$body .= $part['text'] . '<br>';}
 				}
 
-				if (!$GLOBALS['rcvNum']) {
+				if (!$GLOBALS['received_number']) {
 					foreach ($node->addrs->addr as $addr) {
 						if ($addr['type'] == '151') {
-							$GLOBALS['rcvNum']  = formatPhoneNumber($addr['address']);
-							$GLOBALS['rcvName'] = (string) ($addr['contact_name'] ?: $GLOBALS['rcvName']);
+							$GLOBALS['received_number']  = formatPhoneNumber($addr['address']);
+							$GLOBALS['received_name'] = (string) ($addr['contact_name'] ?: $GLOBALS['received_name']);
 						}
 					}
 				}
 
-				$msgs[] = array(
+				$messages[] = array(
 					'address'       => formatPhoneNumber($reader->getAttribute('address')),
 					'contact_name'  => $reader->getAttribute('contact_name'),
 					'date'          => $reader->getAttribute('date'),
@@ -95,19 +103,8 @@
 
 		$reader->close();
 		unlink($tmpfile);
-		array_multisort(array_column($msgs, 'date'), $msgs);
-		return $msgs;
-	}
-
-	function convertToEmoji($matches){
-		if ($matches == '&#0;') {return '';}
-		else {
-			$newStr     = str_replace('&#', '', $matches);
-			$myEmoji    = explode(';', $newStr);
-			$newStr     = dechex($myEmoji[0]) . dechex($myEmoji[1]);
-			$newStr     = hex2bin($newStr);
-			return iconv('UTF-16BE', 'UTF-8', $newStr);
-		}
+		array_multisort(array_column($messages, 'date'), $messages);
+		return $messages;
 	}
 
 	function formatPhoneNumber($number){
@@ -117,26 +114,26 @@
 		else {return $number;}
 	}
 
-	function checkVersion($thisVersion) {
-		$releasePath = 'https://github.com/dynamiccookies/SMS-XML-Parser/releases/latest';
+	function check_version($this_version) {
+		$release_path = 'https://github.com/dynamiccookies/SMS-XML-Parser/releases/latest';
 		$ch = curl_init();
 		curl_setopt($ch, CURLOPT_URL, 'https://api.github.com/repos/dynamiccookies/SMS-XML-Parser/releases/latest'); 
 		curl_setopt($ch, CURLOPT_USERAGENT, 'dynamiccookies/SMS-XML-Parser');
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-		$latestRelease = json_decode(curl_exec($ch), true)['tag_name'];
+		$latest_release = json_decode(curl_exec($ch), true)['tag_name'];
 		curl_close($ch);
-		if (strcmp($thisVersion, $latestRelease) < 0) {
-			return ' <mark id="version" style="font-weight:bold;">A <a href="' . $releasePath . '" target="_blank">new release (' . $latestRelease . ')</a> is available.</mark>';
-		} else if (strcmp($thisVersion, $latestRelease) > 0) {
-			return ' <mark id="version"><strong style="color:red;">BETA VERSION (' . $thisVersion . ')</strong> - This version is not a <a href="' . $releasePath . '" target="_blank">supported release</a>.</mark>';
+		if (strcmp($this_version, $latest_release) < 0) {
+			return ' <mark id="version" style="font-weight:bold;">A <a href="' . $release_path . '" target="_blank">new release (' . $latest_release . ')</a> is available.</mark>';
+		} else if (strcmp($this_version, $latest_release) > 0) {
+			return ' <mark id="version"><strong style="color:red;">BETA VERSION (' . $this_version . ')</strong> - This version is not a <a href="' . $release_path . '" target="_blank">supported release</a>.</mark>';
 		} else {return '';}
 	}
 ?>
 <!doctype html>
 <html>
-    <head>
-        <title>SMS XML Parser</title>
-        <style>
+	<head>
+		<title>SMS XML Parser</title>
+		<style>
 			body {
 				background-color: black;
 				color: white;
@@ -309,64 +306,64 @@
 					max-width: 90%;
 				}
 			}
-        </style>
-    </head>
-    <body>
-		<div>SMS XML Parser <?php echo $thisVersion . checkVersion($thisVersion);?></div>
-        <div id='loading' class='lds-ring'><div></div><div></div><div></div><div></div></div>
-        <div id='uploadForm'>
+		</style>
+	</head>
+	<body>
+		<div>SMS XML Parser <?= $this_version . check_version($this_version);?></div>
+		<div id='loading' class='lds-ring'><div></div><div></div><div></div><div></div></div>
+		<div id='uploadForm'>
 			<button 
-				class='tablink lefttab<?php echo ($example ? ' width33' : ' width50') ?>' 
+				class='tablink lefttab <?= ($example_exists ? 'width33' : 'width50') ?>' 
 				onclick="openTab('file', this, 'left')"
-				<?php if (!$_SESSION['tab'] or $_SESSION['tab'] == 'file' or (!$example and $_SESSION['tab'] == 'example')) {echo " id='defaultTab'";}?>
+				<?php if (!$_SESSION['tab'] or $_SESSION['tab'] == 'file' or (!$example_exists and $_SESSION['tab'] == 'example')) {echo " id='defaultTab'";}?>
 			>Upload File</button>
 			<button 
-				class='tablink<?php echo ($example ? ' width33' : ' righttab width50') ?>' 
-				onclick="openTab('URL', this, '<?php echo ($example ? 'middle' : 'right');?>')"
-				<?php echo ($_SESSION['tab'] == 'URL' ? " id='defaultTab'":'');?>
+				class='tablink <?= ($example_exists ? 'width33' : 'righttab width50') ?>' 
+				onclick="openTab('URL', this, '<?= ($example_exists ? 'middle' : 'right');?>')"
+				<?= ($_SESSION['tab'] == 'URL' ? " id='defaultTab'":'');?>
 			>Upload URL</button>
-			<?php if ($example) {?>
+			<?php if ($example_exists) {?>
 				<button 
 					class='tablink width33' 
 					onclick="openTab('example', this, 'right')"
-					<?php echo ($_SESSION['tab'] == 'example' ? " id='defaultTab'":'');?>
+					<?= ($_SESSION['tab'] == 'example' ? " id='defaultTab'":'');?>
 				>Example</button>
 			<?php }?>
-            <form id='file' class='tabcontent' name='fileUpload' method='post' action='' enctype='multipart/form-data'>
-        		<input type='file' name='xmlfile' accept='.xml,xml/*,text/xml'>
-        		<input type='submit' name='upload' value='Upload' id='submitFile' onclick='loading(this.id); return false;'>
-    		</form>
-    		<form id='URL' class='tabcontent' name='URLUpload' method='post' action='' enctype='multipart/form-data'>
-    		    <input type='text' name='url' placeholder='Upload URL'>
-    		    <input type='submit' name='urlSubmit' value='Upload' id='submitURL' onclick='loading(this.id); return false;'>
-    		    <br><br><strong><a href='https://drive.google.com' target='_blank'>Google Drive</a> links supported!</strong>
-    		    <? echo ($share ?: '');?>
-    		    <br><span id='copied'>Copied!</span>
-    		</form>
-			<?php if ($example) {?>
+			<form id='file' class='tabcontent' name='fileUpload' method='post' action='' enctype='multipart/form-data'>
+				<input type='file' name='xmlfile' accept='.xml,xml/*,text/xml'>
+				<input type='submit' name='upload' value='Upload' id='submitFile' onclick='loading(this.id); return false;'>
+			</form>
+			<form id='URL' class='tabcontent' name='URLUpload' method='post' action='' enctype='multipart/form-data'>
+				<input type='text' name='url' placeholder='Upload URL'>
+				<input type='submit' name='urlSubmit' value='Upload' id='submitURL' onclick='loading(this.id); return false;'>
+				<br><br><strong><a href='https://drive.google.com' target='_blank'>Google Drive</a> links supported!</strong>
+				<? echo ($share ?: '');?>
+				<br><span id='copied'>Copied!</span>
+			</form>
+			<?php if ($example_exists) {?>
 				<form id='example' class='tabcontent' name='example' method='post' action='' enctype='multipart/form-data'>
 					<input type='submit' name='runExample' value='Run Example' id='submitExample' onclick='loading(this.id); return false;'>
 					<br><br><strong>Download and open the <a href='example.xml' download='example.xml'>example.xml</a> file to see the code before it's parsed.</strong>
 				</form>
 			<?php }?>
-        </div>
-        <?php if ($msgs){?>
-            <h1>Text Message History</h1>
+		</div>
+		<?php if ($messages){?>
+			<h1>Text Message History</h1>
 			<?php
 				$urlRegEx = '/(https?:\/\/([\w_-]+(?:(?:\.[\w_-]+)+))([\w.,@?^=%&:\/~+#-]*[\w@?^=%&\/~+#-])?)/';
-				foreach ($msgs as $msg) {
-					echo "\t\t<div class='" . $msg['type'] . "'><span class='details'>" . $msg['readable_date'];
-					if ($msg['type'] == 'received') {echo ($msg['contact_name'] == '(Unknown)' ? '' : ' - ' . $msg['contact_name']) . ' - ' . $msg['address'];}
-					elseif ($msg['type'] == 'sent') {echo ' - ' . ($rcvName ?: 'Me') . ($rcvNum ? ' - ' . $rcvNum : '');}
-					print_r('</span><br>' . preg_replace($urlRegEx, "<a href='$1' target='_blank'>$1</a>", $msg['text']) . "</div>\n");
+				foreach ($messages as $message) {
+					echo "\t\t<div class='" . $message['type'] . "'><span class='details'>" . $message['readable_date'];
+					if ($message['type'] == 'received') {echo ($message['contact_name'] == '(Unknown)' ? '' : ' - ' . $message['contact_name']) . ' - ' . $message['address'];}
+					elseif ($message['type'] == 'sent') {echo ' - ' . ($received_name ?: 'Me') . ($received_number ? ' - ' . $received_number : '');}
+					print_r('</span><br>' . preg_replace($urlRegEx, "<a href='$1' target='_blank'>$1</a>", $message['text']) . "</div>\n");
 				}
 			?>
-        <?php }?>
-        <script>
+		<?php }?>
+		<script>
 			document.getElementById('loading').style.display    = 'none';
 			document.getElementById('uploadForm').style.display = 'block';
 			document.getElementById('defaultTab').click();
-			
+
 			function openTab(tabName,elmnt,position) {
 				var i, tabcontent, tablinks;
 				tabcontent = document.getElementsByClassName('tabcontent');
@@ -396,9 +393,9 @@
 				document.getElementById('copied').style.display = 'block';
 			}
 			function loading(id) {
-			    document.getElementById('loading').style.display = 'block';
-			    document.getElementById(id).submit();
+				document.getElementById('loading').style.display = 'block';
+				document.getElementById(id).submit();
 			}
-        </script>
-    </body>
+		</script>
+	</body>
 </html>
